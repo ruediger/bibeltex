@@ -3,7 +3,9 @@
 ;; Copyright (C) 2013 Rüdiger Sonderfeld <ruediger@c-plusplus.de>
 ;;
 ;; Authors: Rüdiger Sonderfeld <ruediger@c-plusplus.de>
-;; Keywords: org
+;; Keywords: org, bibtex
+;; URL: https://github.com/ruediger/bibeltex
+;; Package-Requires: ((cl-lib "0.3"))
 ;;
 ;; This file is NOT part of GNU Emacs.
 ;;
@@ -32,6 +34,7 @@
 
 (defgroup bibeltex nil
   "Simple BibTeX-like implementation for org-mode in emacs lisp."
+  :link '(url-link "https://github.com/ruediger/bibeltex")
   :tag "BibELTeX"
   :prefix "bibeltex-"
   :group 'org)
