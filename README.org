@@ -1,0 +1,39 @@
+# -*- mode:org; coding:utf-8; mode:auto-fill; fill-column:80; -*-
+#+TITLE: BibELTeX README
+* BibELTeX
+  BibELTeX is a [[http://www.bibtex.org/][BibTeX]]-like tool for GNU Emacs' [[http://orgmode.org/][org-mode]].  Instead of generating
+  TeX instructions BibELTeX generates org-mode data.
+
+  This is intended as a replacement for =ox-bibtex.el= from org-mode's
+  contrib.  Which is similar but only works for LaTeX and HTML export by using
+  =bibtex2html=.
+
+  This is in a very early development stage and currently does not produce any
+  fancy or beautiful output.
+* Installation
+  Put =bibeltex.el= somewhere in your =load-path= and require it.  To
+  deactivate it, simply call =unload-feature= for =bibeltex=.
+
+  Use =\cite{key}= to add a citation and add a line
+
+#+BEGIN_SRC org
+#+BIBLIOGRAPHY file style
+#+END_SRC
+
+  to generate the bibliography.  With =file= being the name of a
+  BibTeX-file. Currently =style= is being ignored.
+* To Do
+** TODO Style format
+   Using a =format-spec= like format is not ideal.
+** TODO More styles
+   Add more styles (similar to bibtex styles).
+** TODO Support for numeric key names.
+   Currenty key names are always the key.  Support numeric keys as well.
+** TODO Add support for Biblatex
+   Needed for the latex path through.
+** TODO Local customization
+   Maybe: Support for =ox-bibtex.el= options
+   Properties? Keywords?
+** TODO Handle (La)TeX instructions
+   E.g., umlauts with =\"{o}=.  Some things are handled by org-mode's entity
+   support.  But sadly not everything.
