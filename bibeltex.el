@@ -53,6 +53,8 @@
   "Sort entries."
   :group 'bibeltex
   :type '(choice (function :tag "Sort function")
+                 (const :tag "By key (number)" bibeltex--sort-key-num)
+                 (const :tag "By year" bibeltex--sort-year)
                  (const :tag "No sorting" nil)))
 
 (defcustom bibeltex-export-all t
@@ -136,7 +138,7 @@ entries from the list."
   ;; Sort keys
   (when bibeltex-sort-function
     (setq org-bibtex-entries
-          (sort org-bibtex-entries #'bibeltex-sort-function)))
+          (sort org-bibtex-entries bibeltex-sort-function)))
 
   ;; Convert entries to org-mode
   (if bibeltex-use-style
@@ -191,14 +193,23 @@ entries from the list."
 (add-hook 'org-export-before-parsing-hook
           #'bibeltex--filter)
 
+(defun bibeltex--get-field (field entry)
+  "Return FIELD from ENTRY or empty string."
+  (or (cdr (assq field entry)) ""))
+
+;;; Sort
+
+(defun bibeltex--sort-key-num (e1 e2)
+  (< (string-to-number (bibeltex--get-field :key-num e1))
+     (string-to-number (bibeltex--get-field :key-num e2))))
+
+(defun bibeltex--sort-year (e1 e2)
+  (< (string-to-number (bibeltex--get-field :year e1))
+     (string-to-number (bibeltex--get-field :year e2))))
 
 ;;; Style
 
 ;; Code inspired by reftex-cite.el
-
-(defun bibeltex--get-field (field entry)
-  "Return FIELD from ENTRY or empty string."
-  (or (cdr (assq field entry)) ""))
 
 (defun bibeltex--get-names (field entry)
   "Return list of names for FIELD in ENTRY."
