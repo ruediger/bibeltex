@@ -35,3 +35,5 @@
 ** TODO Handle (La)TeX instructions
    E.g., umlauts with =\"{o}=.  Some things are handled by org-mode's entity
    support.  But sadly not everything.
+** TODO Try to use org-mode internal functions to handle \cite/#+BIBLIOGRAPHY
+   Currenty \cite/#+BIBLIOGRAPHY are expanded in any case.
