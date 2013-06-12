@@ -27,8 +27,6 @@
    Using a =format-spec= like format is not ideal.
 ** TODO More styles
    Add more styles (similar to bibtex styles).
-** TODO Add support for Biblatex
-   Needed for the latex path through.
 ** TODO Local customization
    Maybe: Support for =ox-bibtex.el= options
    Properties? Keywords?

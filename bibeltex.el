@@ -31,6 +31,7 @@
 (require 'ox)
 (require 'cl-lib)
 (require 'org-bibtex)
+(require 'format-spec)
 
 (defgroup bibeltex nil
   "Simple BibTeX-like implementation for org-mode in emacs lisp."
@@ -48,6 +49,19 @@
   "Use BibTeX instead of BibELTeX for LaTeX export."
   :group 'bibeltex
   :type 'boolean)
+
+(defcustom bibeltex-latex-bibliography-format
+  "\\bibliographystyle{%s}\n\\bibliography{%s}\n"
+  "How to format the bibliography in LaTeX.
+This has only a meaning when `bibeltex-use-bibtex-in-latex' is non-nil.
+%s is replaced with the style information.
+%f is replaced with the file name.
+
+For biblatex support try:
+  \"#+LATEX_HEADER: \\\\usepackage[backend=biber]{biblatex}\\\\addbibresource{%f.bib}\\n
+\\\\printbibliography[heading=bibintoc]\\n\""
+  :group 'bibeltex
+  :type 'string)
 
 (defcustom bibeltex-sort-function nil
   "Sort entries."
@@ -160,17 +174,17 @@ entries from the list."
         (while (re-search-forward "\\\\cite{\\(.*?\\)}" nil 'noerror)
           (replace-match
            (save-match-data
-            (format bibeltex-format-cite
-                    (mapconcat
-                     (lambda (key)
-                       (push key list-of-keys)
-                       (format-spec bibeltex-format-cite-entry
-                                    `((?l . ,key)
-                                      (?n . ,(if bibeltex-use-num-keys
-                                                 (length list-of-keys)
-                                               key)))))
-                     (split-string (match-string 1) "," 'omit-nulls)
-                     bibeltex-format-cite-sep)))
+             (format bibeltex-format-cite
+                     (mapconcat
+                      (lambda (key)
+                        (push key list-of-keys)
+                        (format-spec bibeltex-format-cite-entry
+                                     `((?l . ,key)
+                                       (?n . ,(if bibeltex-use-num-keys
+                                                  (length list-of-keys)
+                                                key)))))
+                      (split-string (match-string 1) "," 'omit-nulls)
+                      bibeltex-format-cite-sep)))
            'fixed-case 'literal)))
       (let (org-bibtex-entries)
         (goto-char (point-min))
@@ -183,8 +197,9 @@ entries from the list."
             (beginning-of-line) (kill-line)
             (if (and (eq backend 'latex)
                      bibeltex-use-bibtex-in-latex)
-                (insert (format "\\bibliographystyle{%s}\n\\bibliography{%s}\n"
-                                style file)) ;; TODO biblatex support
+                (insert (format-spec bibeltex-latex-bibliography-format
+                                     `((?s . ,style)
+                                       (?f . ,file))))
               (org-bibtex-read-file (bibeltex-bib-file-name file))))
           (unless (and (eq backend 'latex)
                        bibeltex-use-bibtex-in-latex)
