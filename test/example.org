@@ -1,0 +1,15 @@
+* Example file for BibELTeX
+
+The bibliography data is stored in [[file:example.bib][example.bib]].  The file is in BibTeX format.
+You can add citations by using \=cite{key,...}=.
+
+E.g., some text\cite{Example1} or even multiple\cite{Example1,Example2}.
+
+A good way to understand what's going on is to use org's org export.  Load
+=ox-org.el= and press =C-c C-e O O= to see the org output in a buffer.
+
+To generate a Bibliography add =#+BIBLIOGRAPHY= =example plain=.
+
+Like so:
+
+#+BIBLIOGRAPHY: example plain
