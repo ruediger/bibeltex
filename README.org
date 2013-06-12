@@ -27,8 +27,6 @@
    Using a =format-spec= like format is not ideal.
 ** TODO More styles
    Add more styles (similar to bibtex styles).
-** TODO Support for numeric key names.
-   Currenty key names are always the key.  Support numeric keys as well.
 ** TODO Add support for Biblatex
    Needed for the latex path through.
 ** TODO Local customization

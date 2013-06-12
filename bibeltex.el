@@ -72,11 +72,30 @@ See `bibeltex-style-alist' for potential styles."
   :type '(list (cons (symbol :tag "Style name")
                      (variable :tag "Style variable"))))
 
-(defcustom bibeltex-format-cite "^{[[#\\1][\\1]]}"
-  "How to format \\cite.
-\\1 is replaced with the key name."
+(defcustom bibeltex-format-cite-entry "[[#%l][%n]]"
+  "How for format individual cite entries.
+%l is replaced with the key name.
+%n is replaced by the key name or number depending on `bibeltex-use-num-keys'.
+The entries are wrapped around in `bibeltex-format-cite'.  Multiple entries are
+separated by `bibeltex-format-cite-sep'"
   :group 'bibeltex
   :type 'string)
+
+(defcustom bibeltex-format-cite-sep ", "
+  "Separate multiple cite entries."
+  :group 'bibeltex
+  :type 'string)
+
+(defcustom bibeltex-format-cite "^{%s}"
+  "How to format \\cite.
+%s is replaced by the list of entries."
+  :group 'bibeltex
+  :type 'string)
+
+(defcustom bibeltex-use-num-keys nil
+  "Use numeric keys."
+  :group 'bibeltex
+  :type 'boolean)
 
 (defun bibeltex--use-org-bibtex ()
   "Use `org-bibtex-write' to insert bibtex data."
@@ -94,15 +113,32 @@ See `bibeltex-style-alist' for potential styles."
   "Handle the bibtex part.
 If LIST-OF-KEYS is non-nil and `bibeltex-export-all' nil then only insert
 entries from the list."
+  ;; Filter keys if required
   (when (and (not bibeltex-export-all) list-of-keys)
     (setq org-bibtex-entries
           (cl-delete-if (lambda (entry)
                           (not (member (cdr (assq :key entry)) list-of-keys)))
                         org-bibtex-entries)))
+  ;; Add :key-num property to entries
+  (dotimes (n (length org-bibtex-entries))
+    (let ((key (cdr (assq :key (nth n org-bibtex-entries)))))
+      (push (cons :key-num
+                  (if (not bibeltex-use-num-keys)
+                      key
+                    (number-to-string
+                     (let ((pos (cl-position key list-of-keys :test #'string=)))
+                       (if (numberp pos)
+                           ;; count from last element
+                           (- (length list-of-keys) pos)
+                         (push key list-of-keys)
+                         (length list-of-keys))))))
+            (nth n org-bibtex-entries))))
+  ;; Sort keys
   (when bibeltex-sort-function
     (setq org-bibtex-entries
           (sort org-bibtex-entries #'bibeltex-sort-function)))
 
+  ;; Convert entries to org-mode
   (if bibeltex-use-style
       (bibeltex--use-style bibeltex-use-style)
     (bibeltex--use-org-bibtex)))
@@ -119,13 +155,26 @@ entries from the list."
     (let (list-of-keys)
       (unless (and (eq backend 'latex)
                    bibeltex-use-bibtex-in-latex)
-        ;; TODO handle multiple cites
         (while (re-search-forward "\\\\cite{\\(.*?\\)}" nil 'noerror)
-          (push (match-string 1) list-of-keys)
-          (replace-match bibeltex-format-cite)))
+          (replace-match
+           (save-match-data
+            (format bibeltex-format-cite
+                    (mapconcat
+                     (lambda (key)
+                       (push key list-of-keys)
+                       (format-spec bibeltex-format-cite-entry
+                                    `((?l . ,key)
+                                      (?n . ,(if bibeltex-use-num-keys
+                                                 (length list-of-keys)
+                                               key)))))
+                     (split-string (match-string 1) "," 'omit-nulls)
+                     bibeltex-format-cite-sep)))
+           'fixed-case 'literal)))
       (let (org-bibtex-entries)
         (goto-char (point-min))
-        (while (re-search-forward "#\\+BIBLIOGRAPHY:[ \t]+\\([[:alnum:]-_.]+\\)[ \t]+\\([[:alnum:]]+\\)[ \t]*\\([[:alnum:]-:]+\\)?" nil 'noerror)
+        (while (re-search-forward
+                "#\\+BIBLIOGRAPHY:[ \t]+\\([[:alnum:]-_.]+\\)[ \t]+\\([[:alnum:]]+\\)[ \t]*\\([[:alnum:]-:]+\\)?"
+                nil 'noerror)
           (let ((file (match-string 1))
                 (style (match-string 2))
                 (options (match-string 3)))
@@ -160,6 +209,7 @@ entries from the list."
 
 (defconst bibeltex--format-map
   '((?l . :key)
+    (?L . :key-num)
     (?n . :number)
     (?v . :volume)
     (?s . :school)
@@ -228,8 +278,8 @@ If names are cut off they are replaced by \"et al.\""
   :prefix "bibeltex-style")
 
 (defcustom bibeltex-style-default
-  '((article . "** [%l] %2a, %y: %t\n:PROPERTIES:\n:CUSTOM_ID: %l\n:END:\n\n- %y %m\n- [[%U]]\n- DOI: [[doi://%D][%D]]\n\n")
-    (t . "** [%l] %2a, %y: %t\n:PROPERTIES:\n:CUSTOM_ID: %l\n:END:\n\n"))
+  '((article . "** =[%L]= %2a, %y: %t\n:PROPERTIES:\n:CUSTOM_ID: %l\n:END:\n\n- %y %m\n- [[%U]]\n- DOI: [[doi://%D][%D]]\n\n")
+    (t . "** =[%L]= %2a, %y: %t\n:PROPERTIES:\n:CUSTOM_ID: %l\n:END:\n\n"))
   "Default style."
   :group 'bibeltex-styles)
 
