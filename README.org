@@ -23,8 +23,6 @@
   to generate the bibliography.  With =file= being the name of a
   BibTeX-file. Currently =style= is being ignored.
 * To Do
-** TODO Style format
-   Using a =format-spec= like format is not ideal.
 ** TODO More styles
    Add more styles (similar to bibtex styles).
 ** TODO Local customization
