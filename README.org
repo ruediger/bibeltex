@@ -22,6 +22,38 @@
 
   to generate the bibliography.  With =file= being the name of a
   BibTeX-file. Currently =style= is being ignored.
+* Style
+To add a new style define a new elisp variable and add it to
+=bibeltex-style-alist=.  A style is a list containing either format strings or
+lisp expressions.  Lisp expressions are evaluated and should return format
+strings.  Lisp expressions are evaluated with the entry fields bound to
+=entry-FIELDNAME=.  E.g., for the =:author= field it would be =entry-author=.
+
+The format specifications are the following: =%ENTRY%= or
+=%ENTRY:OPTIONA:OPTIONB:...%=.  =ENTRY= should be the name of a field without
+the leading :.  E.g., =%key-num%= to get the =:key-num= field.  The option
+fields look like =func(arg0,arg1,...)=. With =func= being a function from the
+=bibeltex--style-option-functions= map.  The functions are called with the
+field value as first argument and the arguments from the option call
+following. E.g., =%key-num:foo(1)%= would result in
+=foo((bibeltex--get-field :key-num entry), "1")=.  The return value replaces
+the field value in the format and for the next option call.  To cancel the
+insertion of a format string the symbol =cancel= can be returned.
+
+There are two predefined functions:
+
+- =names= :: which handles BibTeX name lists and takes an optional numeric
+             argument for the number of names to be added.
+- =orcancel= :: cancels the format string insertion if the field is emptry.
+
+A style should always add a properties entry with a custom-id equal to the
+=:key= field to an entry to turn the entry into a link target.
+
+Sorting and quote style are currently not included in the style itself but
+handled separately by =bibeltex-format-cite-entry=, =bibeltex-format-cite-sep=,
+=bibeltex-format-cite=, =bibeltex-use-num-keys=, =bibeltex-sort-function=.
+This will however be definable by the style in the future.
+
 * To Do
 ** TODO More styles
    Add more styles (similar to bibtex styles).
