@@ -5,7 +5,7 @@
 ;; Authors: Rüdiger Sonderfeld <ruediger@c-plusplus.de>
 ;; Keywords: org, bibtex
 ;; URL: https://github.com/ruediger/bibeltex
-;; Package-Requires: ((cl-lib "0.3") (org-mode "8.0.0"))
+;; Package-Requires: ((cl-lib "0.3") (org "8.0.0"))
 ;;
 ;; This file is NOT part of GNU Emacs.
 ;;
